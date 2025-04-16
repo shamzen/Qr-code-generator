@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart QR Code Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #58a6ff;
+      margin-bottom: 20px;
+    }
+    input, button, textarea {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+      border: none;
+      outline: none;
+      width: 300px;
+      background: #161b22;
+      color: #fff;
+    }
+    button {
+      background-color: #238636;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #2ea043;
+    }
+    #qr-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: #161b22;
+      border-radius: 12px;
+    }
+    #more-inputs {
+      display: none;
+      flex-direction: column;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ Smart QR Code Generator</h1>
+  <input type="text" id="mainInput" placeholder="Enter URL or Text..." oninput="checkInput()" />
+  
+  <div id="more-inputs">
+    <input type="text" id="title" placeholder="Add a title..." />
+    <textarea id="desc" placeholder="Add a description..."></textarea>
+  </div>
+  
+  <button onclick="generateQR()">Generate QR</button>
+  
+  <div id="qr-container">
+    <canvas id="qrCanvas"></canvas>
+    <br />
+    <button onclick="downloadQR()">⬇️ Download QR</button>
+  </div>
+
+  <script>
+    const urlRegex = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
+
+    function checkInput() {
+      const value = document.getElementById('mainInput').value.trim();
+      const more = document.getElementById('more-inputs');
+
+      if (!value) {
+        more.style.display = 'none';
+        return;
+      }
+
+      if (urlRegex.test(value)) {
+        more.style.display = 'none';
+      } else {
+        more.style.display = 'flex';
+      }
+    }
+
+    function generateQR() {
+      const mainInput = document.getElementById('mainInput').value.trim();
+      const canvas = document.getElementById('qrCanvas');
+      let dataToEncode = mainInput;
+
+      if (!urlRegex.test(mainInput)) {
+        const title = document.getElementById('title').value.trim();
+        const desc = document.getElementById('desc').value.trim();
+
+        if (!title || !desc) {
+          alert("🛑 Please fill out the title and description.");
+          return;
+        }
+
+        dataToEncode = `Title: ${title}\nDescription: ${desc}\n\n${mainInput}`;
+      }
+
+      QRCode.toCanvas(canvas, dataToEncode, {
+        color: {
+          dark: "#ffffff",
+          light: "#0d1117"
+        }
+      }, function (error) {
+        if (error) console.error(error);
+        else console.log("✅ QR Code generated!");
+      });
+    }
+
+    function downloadQR() {
+      const canvas = document.getElementById('qrCanvas');
+      const link = document.createElement('a');
+      link.download = 'qrcode.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
+<!-- This code generates a QR code based on user input. It includes a title and description for non-URL inputs. The QR code can be downloaded as an image. -->
